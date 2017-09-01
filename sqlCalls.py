@@ -3,8 +3,6 @@ import sqlite3
 ## All sql function in this file need to be reworked to use proper parameter substitution to prevent injection
 ## I currently just have it 'working' and will look at security later
 
-
-
 def CreateDB():
     ## creates the connection to the sqlite db
     conn = sqlite3.connect('pyBook.db')
@@ -46,12 +44,13 @@ def PrintDB():
     conn = sqlite3.connect('pyBook.db')
     c = conn.cursor()
     sql_res = c.execute("select * from books")
-    #print(sql_res.fetchall())
 
-    print("| Book_id | isbn10     | isbn13        | title                                    | author               | status | lendee               |")
-
+    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
+    print("| " + "Book_id".ljust(7) + " | " + "isbn10".ljust(10) + " | " + "isbn13".ljust(13) + " | " + "title".ljust(40) + " | " + "author".ljust(20) + " | status | " + "lendee".ljust(20) + " |")
+    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
     for entry in sql_res.fetchall():
-        print("| " + str(entry[0]).ljust(7) + " | 0" + str(entry[1]) + " | " + str(entry[2]) + " | " + str(entry[3]).ljust(40) + " | " + str(entry[4]).ljust(20) + " | " + str(entry[5]).ljust(6) + " | " + str(entry[6]).ljust(20) + " |")
+        print("| " + str(entry[0]).rjust(7) + " | 0" + str(entry[1]) + " | " + str(entry[2]) + " | " + str(entry[3]).ljust(40) + " | " + str(entry[4]).ljust(20) + " | " + str(entry[5]).center(6) + " | " + str(entry[6]).ljust(20) + " |")
+    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
 
     conn.commit()
     conn.close()
@@ -111,7 +110,7 @@ def lendBook(isbn, lendee):
     #PrintDB()
 
 
-def returnBook(isbn):
+def returnBook(isbn): ##
     # builds the correct string depending on which isbn is used
     if len(isbn) == 13:
         call = "UPDATE books SET status='0', lendee='' WHERE isbn13=" + isbn
@@ -120,3 +119,24 @@ def returnBook(isbn):
     Execute(call) # runs the update call to "return" the book
     ## uncomment the following line if you want to see the changes to the db after this function is called
     #PrintDB()
+
+
+def Fetch(call, params=None): ## returns a line from the db will change to make more universal
+    if params == None:
+        conn = sqlite3.connect('pybook.db')
+        c = conn.cursor()
+        c.execute(call)
+        fetched = c.fetchone()
+        conn.commit()
+        conn.close()
+    return fetched
+
+
+
+def getBookInfo(isbn):  ## should change this to return a book object from sql call
+    if len(isbn) == 13:
+        call = "SELECT * FROM books WHERE isbn13=" + isbn
+    else:
+        call = "SELECT * FROM books WHERE isbn10=" + isbn
+        return Fetch(call)
+

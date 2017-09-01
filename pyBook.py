@@ -7,10 +7,11 @@ def Main():
         if isbn != "db": ## type 'db' when the prototype askes for an isbn to show all db data
             if isbnExist(isbn): # tests if the book exists in the db
                 status = lendStatus(isbn) # finds the status of the book being lent out
+                title = sqlCalls.getBookInfo(isbn)[3]
                 if status[0] == 0:
-                    yn = input('Are you Lending this book out? y/n\n')
+                    yn = input('Are you lending out ' + title + 'y/n\n')
                     if yn == "y":
-                        name = input("To whome are you lending it to?\n")
+                        name = input("To whom are you lending it to?\n")
                         lendBook(isbn, name)
                 else:
                     print(status[1] + ' has this book')
