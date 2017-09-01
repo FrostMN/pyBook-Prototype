@@ -1,6 +1,9 @@
 import os, fileIO, secrets
 from sqlCalls import CreateDB
 
+## run this first to setup the program ##
+
+
 config_dir_path = os.path.expanduser("~/Source/python/configs/")
 pybook_config_dir = config_dir_path + "pybook/"
 config_file = "config.py"
