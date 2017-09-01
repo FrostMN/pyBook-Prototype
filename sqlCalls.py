@@ -11,26 +11,25 @@ def CreateDB():
     ## String to build the db for the application
     c.execute("""
     CREATE TABLE books(
-      Book_ID int AUTO_INCREMENT,
+      Book_ID INTEGER PRIMARY KEY AUTOINCREMENT,
       isbn10 int,
       isbn13 int,
       title varchar(200),
       author varchar(200),
       status int,
-      lendee varchar(200),
-      PRIMARY KEY (Book_ID)
+      lendee varchar(200)
       )
     """)
 
     ## Loads in test Data for development
     c.execute("""    
-    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('1', '0380973464', '9780380973460', 'Cryptonomicon', 'Stephenson, Neil', 0, "" );
+    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0380973464', '9780380973460', 'Cryptonomicon', 'Stephenson, Neil', 0, "" );
               """)
     c.execute("""
-    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('2', '0316154695', '9780316154697', 'Lets Explore Diabetes with Owls', 'Sedaris, David', 1, "Amber" );
+    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0316154695', '9780316154697', 'Lets Explore Diabetes with Owls', 'Sedaris, David', 1, "Amber" );
               """)
     c.execute("""
-    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('3', '0330258648', '9780330258647', 'The hitchhikers guide to the galaxy', 'Adams, Douglas', 0, "" );
+    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0330258648', '9780330258647', 'The hitchhikers guide to the galaxy', 'Adams, Douglas', 0, "" );
               """)
 
     ## commits changes and closes the connection
