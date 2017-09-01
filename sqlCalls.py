@@ -17,6 +17,7 @@ def CreateDB():
       isbn10 int,
       isbn13 int,
       title varchar(200),
+      author varchar(200),
       status int,
       lendee varchar(200),
       PRIMARY KEY (Book_ID)
@@ -25,10 +26,13 @@ def CreateDB():
 
     ## Loads in test Data for development
     c.execute("""    
-    INSERT INTO books (Book_ID, isbn10, isbn13, title, status, lendee) VALUES ('1', '0380973464', '9780380973460', 'Cryptonomicon', 0, "" );
+    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('1', '0380973464', '9780380973460', 'Cryptonomicon', 'Stephenson, Neil', 0, "" );
               """)
     c.execute("""
-    INSERT INTO books (Book_ID, isbn10, isbn13, title, status, lendee) VALUES ('2', '0380973123', '0380973464123', 'Cryptonomicron', 1, "Amber" );
+    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('2', '0316154695', '9780316154697', 'Lets Explore Diabetes with Owls', 'Sedaris, David', 1, "Amber" );
+              """)
+    c.execute("""
+    INSERT INTO books (Book_ID, isbn10, isbn13, title, author, status, lendee) VALUES ('3', '0330258648', '9780330258647', 'The hitchhikers guide to the galaxy', 'Adams, Douglas', 0, "" );
               """)
 
     ## commits changes and closes the connection
@@ -42,7 +46,13 @@ def PrintDB():
     conn = sqlite3.connect('pyBook.db')
     c = conn.cursor()
     sql_res = c.execute("select * from books")
-    print(sql_res.fetchall())
+    #print(sql_res.fetchall())
+
+    print("| Book_id | isbn10     | isbn13        | title                                    | author               | status | lendee               |")
+
+    for entry in sql_res.fetchall():
+        print("| " + str(entry[0]).ljust(7) + " | 0" + str(entry[1]) + " | " + str(entry[2]) + " | " + str(entry[3]).ljust(40) + " | " + str(entry[4]).ljust(20) + " | " + str(entry[5]).ljust(6) + " | " + str(entry[6]).ljust(20) + " |")
+
     conn.commit()
     conn.close()
 
@@ -77,6 +87,7 @@ def isbnExist(isbn):
 def lendStatus(isbn):
     conn = sqlite3.connect('pybook.db')
     c = conn.cursor()
+    # builds the correct string depending on which isbn is used
     if len(isbn) == 13:
         c.execute('SELECT status, lendee FROM books WHERE isbn13=' + isbn)
     else:
@@ -88,6 +99,7 @@ def lendStatus(isbn):
 
 
 def lendBook(isbn, lendee):
+    # builds the correct string depending on which isbn is used
     if len(isbn) == 13:
         call = "UPDATE books SET status='1', lendee='{{lendee}}' WHERE isbn13=" + isbn
     else:
