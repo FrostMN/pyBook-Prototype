@@ -15,6 +15,7 @@ pybook_config_file = pybook_config_dir + config_file
 
 ## creates the config directory if it doesnt exist
 if not fileIO.directoryExists(pybook_config_dir):
+    print("Creating config directory")
     fileIO.createDirectory(pybook_config_dir)
 else:
     print("config directory alredy exixts")
@@ -35,12 +36,14 @@ config = {'API_URL': '{{api_url}}', 'API_KEY': '{{api_key}}', 'SECRET_KEY': '{{s
     config_text = config_text.replace('{{api_key}}', api_key)
     config_text = config_text.replace('{{secret}}', flask_secret_key)
 
+    print("creating config file.")
     fileIO.createConfig(config_text)
 else:
     print("config file already exists.")
 
 ## created the sqlite db if it dosent exist
 if not fileIO.fileExists("pyBook.db"):
+    print("creating pyBook.db")
     CreateDB()
 else:
     print("pyBook.db already exists")
