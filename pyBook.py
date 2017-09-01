@@ -1,15 +1,15 @@
 from sqlCalls import isbnExist, lendStatus, lendBook, returnBook
-import sqlCalls, apiCalls
+import sqlCalls, apiCalls, valid
 
 def Main():
     while(True):
-        isbn = input("What isbn would you like to check?\n")  # need to implement error checking for isbn
-        if isbn != "db": ## type 'db' when the prototype askes for an isbn to show all db data
+        isbn = getISBN() #input("Please enter an ISBN, 'db', or 'q':\n")  # need to implement error checking for isbn
+        if isbn != "db" and isbn != "q": ## type 'db' when the prototype askes for an isbn to show all db data or 'q' to quit I know this isnt the best way but its there for now
             if isbnExist(isbn): # tests if the book exists in the db
                 status = lendStatus(isbn) # finds the status of the book being lent out
                 title = sqlCalls.getBookInfo(isbn)[3]
                 if status[0] == 0:
-                    yn = input('Are you lending out ' + title + 'y/n\n')
+                    yn = input('Are you lending out \'' + title + '\'? y/n\n')
                     if yn == "y":
                         name = input("To whom are you lending it to?\n")
                         lendBook(isbn, name)
@@ -20,8 +20,20 @@ def Main():
                         returnBook(isbn)
             else:
                 apiCalls.getBook(isbn)
+        elif isbn == "q":
+            break
         else:
             sqlCalls.PrintDB()
+    print("Thanks for using the pyBook-Prototype!")
 
+
+def getISBN():
+    while True:
+        inPut = input("Please enter an ISBN, 'db', or 'q':\n")
+        if inPut == 'db' or inPut == 'q':
+            return inPut
+        isbn = valid.ISBN(inPut)
+        if isbn != False:
+            return isbn
 
 Main()

@@ -7,7 +7,6 @@ apiKey = conf['API_KEY']
 apiUrl = str(conf['API_URL']).replace("{{KEY}}", apiKey)
 
 def getBook(isbn):
-    bk = Book("testing")
+    bk = Book("isbn is not in the db")
     print(bk._test)
     return requests.get(apiUrl + isbn).text
-
