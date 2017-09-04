@@ -15,22 +15,12 @@ def CreateDB():
       isbn10 int,
       isbn13 int,
       title varchar(200),
-      author varchar(200),
+      author_ln varchar(200),
+      author_fn varchar(200),
       status int,
       lendee varchar(200)
-      )
+      );
     """)
-
-    ## Loads in test Data for development
-    c.execute("""    
-    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0380973464', '9780380973460', 'Cryptonomicon', 'Stephenson, Neil', 0, "" );
-              """)
-    c.execute("""
-    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0316154695', '9780316154697', 'Lets Explore Diabetes with Owls', 'Sedaris, David', 1, "Amber" );
-              """)
-    c.execute("""
-    INSERT INTO books ( isbn10, isbn13, title, author, status, lendee) VALUES ( '0330258648', '9780330258647', 'The hitchhikers guide to the galaxy', 'Adams, Douglas', 0, "" );
-              """)
 
     ## commits changes and closes the connection
     conn.commit()
@@ -44,35 +34,38 @@ def PrintDB():
     c = conn.cursor()
     sql_res = c.execute("select * from books")
 
-    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
-    print("| " + "Book_id".ljust(7) + " | " + "isbn10".ljust(10) + " | " + "isbn13".ljust(13) + " | " + "title".ljust(40) + " | " + "author".ljust(20) + " | status | " + "lendee".ljust(20) + " |")
-    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
+    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 17) + "+" + ("-" * 17) + "+" + ("-" * 8) + "+" + ("-" * 22) + "+")
+    print("| " + "Book_id".ljust(7) + " | " + "isbn10".ljust(10) + " | " + "isbn13".ljust(13) + " | " + "title".ljust(40) + " | " + "author_ln".ljust(15) + " | " + "author_fn".ljust(15) + " | status | " + "lendee".ljust(20) + " |")
+    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 17) + "+" + ("-" * 17) + "+" + ("-" * 8) + "+" + ("-" * 22) + "+")
     for entry in sql_res.fetchall():
-        print("| " + str(entry[0]).rjust(7) + " | 0" + str(entry[1]) + " | " + str(entry[2]) + " | " + str(entry[3]).ljust(40) + " | " + str(entry[4]).ljust(20) + " | " + str(entry[5]).center(6) + " | " + str(entry[6]).ljust(20) + " |")
-    print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 22) + "+" + ("-" * 8) + "+" +("-" * 22) + "+")
-
+        print("| " + str(entry[0]).rjust(7) + " | " + str(entry[1]).rjust(10, "0") + " | " + str(entry[2]) + " | " + str(entry[3][0:40]).ljust(40) + " | " + str(entry[4]).ljust(15) + " | " + str(entry[5]).ljust(15) + " | " + str(entry[6]).rjust(6) + " | " + str(entry[7]).ljust(20) + " |")
+        print("+" + ("-" * 9) + "+" + ("-" * 12) + "+" + ("-" * 15) + "+" + ("-" * 42) + "+" + ("-" * 17) + "+" + ("-" * 17) + "+" + ("-" * 8) + "+" + ("-" * 22) + "+")
     conn.commit()
     conn.close()
 
 
 def Execute(call, params=None):
-    ## exectues a sql query, currenly ony does single query, but will be extended to do multiple
+    ## exectues a sql query
+    conn = sqlite3.connect('pybook.db')
+    c = conn.cursor()
     if params == None:
-        conn = sqlite3.connect('pybook.db')
-        c = conn.cursor()
         c.execute(call)
-        conn.commit()
-        conn.close()
+    else:
+        c.execute(call, params)
+    conn.commit()
+    conn.close()
+
 
 
 def isbnExist(isbn):
     ## queries the db to determine if a book has an entry
+    param = (isbn,)
     conn = sqlite3.connect('pybook.db')
     c = conn.cursor()
     if len(isbn) == 13:
-        c.execute('SELECT COUNT(*) FROM books WHERE isbn13=' + isbn)
+        c.execute('SELECT COUNT(*) FROM books WHERE isbn13=?', param)
     else:
-        c.execute('SELECT COUNT(*) FROM books WHERE isbn10=' + isbn)
+        c.execute('SELECT COUNT(*) FROM books WHERE isbn10=?', param)
     count = c.fetchone()
     conn.commit()
     conn.close()
@@ -83,13 +76,14 @@ def isbnExist(isbn):
 
 
 def lendStatus(isbn):
+    param = (isbn,)
     conn = sqlite3.connect('pybook.db')
     c = conn.cursor()
     # builds the correct string depending on which isbn is used
     if len(isbn) == 13:
-        c.execute('SELECT status, lendee FROM books WHERE isbn13=' + isbn)
+        c.execute('SELECT status, lendee FROM books WHERE isbn13=?', param)
     else:
-        c.execute('SELECT status, lendee FROM books WHERE isbn10=' + isbn)
+        c.execute('SELECT status, lendee FROM books WHERE isbn10=?', param)
     status = c.fetchone()
     conn.commit()
     conn.close()
@@ -97,45 +91,53 @@ def lendStatus(isbn):
 
 
 def lendBook(isbn, lendee):
+    params = (lendee, isbn)
+
     # builds the correct string depending on which isbn is used
     if len(isbn) == 13:
-        call = "UPDATE books SET status='1', lendee='{{lendee}}' WHERE isbn13=" + isbn
+        call = "UPDATE books SET status='1', lendee=? WHERE isbn13=?"
     else:
-        call = "UPDATE books SET status='1', lendee='{{lendee}}' WHERE isbn10=" + isbn
-
-    call = call.replace("{{lendee}}", lendee)
-    Execute(call)
+        call = "UPDATE books SET status='1', lendee=? WHERE isbn10=?"
+    Execute(call, params)
     ## uncomment the following line if you want to see the changes to the db after this function is called
     #PrintDB()
 
 
 def returnBook(isbn): ##
     # builds the correct string depending on which isbn is used
+    params = (isbn,)
     if len(isbn) == 13:
-        call = "UPDATE books SET status='0', lendee='' WHERE isbn13=" + isbn
+        call = "UPDATE books SET status='0', lendee='' WHERE isbn13=?"
     else:
-        call = "UPDATE books SET status='0', lendee='' WHERE isbn10=" + isbn
-    Execute(call) # runs the update call to "return" the book
+        call = "UPDATE books SET status='0', lendee='' WHERE isbn10=?"
+    Execute(call, params) # runs the update call to "return" the book
     ## uncomment the following line if you want to see the changes to the db after this function is called
     #PrintDB()
 
 
-def Fetch(call, params=None): ## returns a line from the db will change to make more universal
-    if params == None:
-        conn = sqlite3.connect('pybook.db')
-        c = conn.cursor()
-        c.execute(call)
-        fetched = c.fetchone()
-        conn.commit()
-        conn.close()
+def Fetch(call, params): ## returns a line from the db will change to make more universal
+    param = (params,)
+    conn = sqlite3.connect('pybook.db')
+    c = conn.cursor()
+    c.execute(call, param)
+    fetched = c.fetchone()
+    conn.commit()
+    conn.close()
     return fetched
 
 
 
 def getBookInfo(isbn):  ## should change this to return a book object from sql call
     if len(isbn) == 13:
-        call = "SELECT * FROM books WHERE isbn13=" + isbn
+        call = "SELECT * FROM books WHERE isbn13=?"
     else:
-        call = "SELECT * FROM books WHERE isbn10=" + isbn
-        return Fetch(call)
+        call = "SELECT * FROM books WHERE isbn10=?"
+    return Fetch(call, isbn)
 
+def addBook(book):
+    call = """
+INSERT INTO books(isbn10, isbn13, title, author_ln, author_fn, status, lendee) 
+VALUES( ?, ?, ?, ?, ?, 0, '');
+"""
+    call_params = ( book._isbn10, book._isbn13, book._title, book._author_ln, book._author_fn )
+    Execute(call, call_params)

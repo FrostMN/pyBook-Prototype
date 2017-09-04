@@ -1,5 +1,5 @@
-import os, fileIO, secrets
-from sqlCalls import CreateDB
+import os, fileIO, secrets, apiCalls
+from sqlCalls import CreateDB, addBook
 
 ## run this first to setup the program ##
 
@@ -45,6 +45,10 @@ else:
 if not fileIO.fileExists("pyBook.db"):
     print("creating pyBook.db")
     CreateDB()
+    ## Loads test data into db
+    addBook(apiCalls.getBook('0380973464'))
+    addBook(apiCalls.getBook('0316154695'))
+    addBook(apiCalls.getBook('0330258648'))
 else:
     print("pyBook.db already exists")
 

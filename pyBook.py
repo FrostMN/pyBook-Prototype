@@ -1,4 +1,4 @@
-from sqlCalls import isbnExist, lendStatus, lendBook, returnBook
+from sqlCalls import isbnExist, lendStatus, lendBook, returnBook, addBook
 import sqlCalls, apiCalls, valid
 
 def Main():
@@ -19,7 +19,10 @@ def Main():
                     if yn == "y":
                         returnBook(isbn)
             else:
-                apiCalls.getBook(isbn)
+                newBook = apiCalls.getBook(isbn)
+                yn = input('Are you adding \'' + newBook._title + '\' to your library? y/n\n')
+                if yn == "y":
+                    addBook(newBook)
         elif isbn == "q":
             break
         else:
@@ -35,5 +38,7 @@ def getISBN():
         isbn = valid.ISBN(inPut)
         if isbn != False:
             return isbn
+
+
 
 Main()
